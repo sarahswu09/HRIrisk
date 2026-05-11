@@ -1,0 +1,820 @@
+import React, { useState } from "react";
+import { MODEL_CONFIG } from "../config/modelConfig";
+
+const styles: Record<string, React.CSSProperties> = {
+  root: {
+    minHeight: "100vh",
+    backgroundColor: "#f8f9fa",
+    fontFamily: "'DM Sans', sans-serif",
+    color: "#1a1a2e",
+  },
+  nav: {
+    backgroundColor: "#ffffff",
+    borderBottom: "1px solid #e2e8f0",
+    padding: "0 2rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    height: "64px",
+    position: "sticky" as const,
+    top: 0,
+    zIndex: 100,
+    boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+  },
+  navBrand: {
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
+  navIcon: {
+    width: "32px",
+    height: "32px",
+    backgroundColor: "#2563eb",
+    borderRadius: "8px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#fff",
+    fontSize: "16px",
+    fontWeight: 700,
+  },
+  navTitle: {
+    fontSize: "1rem",
+    fontWeight: 700,
+    color: "#1a1a2e",
+    letterSpacing: "-0.02em",
+  },
+  navSubtitle: {
+    fontSize: "0.75rem",
+    color: "#64748b",
+    fontWeight: 400,
+  },
+  navBadge: {
+    backgroundColor: "#eff6ff",
+    color: "#2563eb",
+    fontSize: "0.7rem",
+    fontWeight: 600,
+    padding: "3px 8px",
+    borderRadius: "20px",
+    border: "1px solid #bfdbfe",
+  },
+  main: {
+    maxWidth: "780px",
+    margin: "0 auto",
+    padding: "2.5rem 1.5rem 4rem",
+  },
+  pageHeader: {
+    marginBottom: "2.5rem",
+    textAlign: "center" as const,
+  },
+  pageTitle: {
+    fontSize: "1.875rem",
+    fontWeight: 700,
+    color: "#0f172a",
+    letterSpacing: "-0.03em",
+    marginBottom: "0.5rem",
+  },
+  pageSubtitle: {
+    fontSize: "0.9375rem",
+    color: "#64748b",
+    lineHeight: 1.6,
+    maxWidth: "560px",
+    margin: "0 auto",
+  },
+  auc: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    backgroundColor: "#f0fdf4",
+    color: "#16a34a",
+    border: "1px solid #bbf7d0",
+    borderRadius: "20px",
+    padding: "4px 12px",
+    fontSize: "0.78rem",
+    fontWeight: 600,
+    marginTop: "0.75rem",
+  },
+  disclaimer: {
+    backgroundColor: "#fff7ed",
+    border: "1px solid #fed7aa",
+    borderRadius: "10px",
+    padding: "1rem 1.25rem",
+    marginBottom: "2rem",
+    display: "flex",
+    gap: "10px",
+    alignItems: "flex-start",
+  },
+  disclaimerIcon: {
+    fontSize: "1.1rem",
+    flexShrink: 0,
+    marginTop: "1px",
+  },
+  disclaimerText: {
+    fontSize: "0.8125rem",
+    color: "#92400e",
+    lineHeight: 1.6,
+  },
+  disclaimerTitle: {
+    fontWeight: 700,
+    marginBottom: "2px",
+    color: "#78350f",
+  },
+  card: {
+    backgroundColor: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "12px",
+    padding: "1.5rem",
+    marginBottom: "1.25rem",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
+  },
+  sectionTitle: {
+    fontSize: "0.9375rem",
+    fontWeight: 700,
+    color: "#0f172a",
+    marginBottom: "1.25rem",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+  },
+  sectionIcon: {
+    width: "26px",
+    height: "26px",
+    borderRadius: "6px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "13px",
+  },
+  formGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "1rem",
+  },
+  formGroup: {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "5px",
+  },
+  label: {
+    fontSize: "0.8125rem",
+    fontWeight: 600,
+    color: "#374151",
+  },
+  input: {
+    padding: "9px 12px",
+    borderRadius: "8px",
+    border: "1.5px solid #e2e8f0",
+    fontSize: "0.875rem",
+    color: "#1a1a2e",
+    backgroundColor: "#fff",
+    outline: "none",
+    transition: "border-color 0.15s",
+    fontFamily: "'DM Sans', sans-serif",
+    appearance: "none" as const,
+  },
+  comorbidityGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "0.625rem",
+  },
+  toggleRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "8px 10px",
+    borderRadius: "8px",
+    backgroundColor: "#f8fafc",
+    border: "1.5px solid #e2e8f0",
+    cursor: "pointer",
+    transition: "all 0.15s",
+  },
+  toggleRowActive: {
+    backgroundColor: "#eff6ff",
+    border: "1.5px solid #93c5fd",
+  },
+  toggleLabel: {
+    fontSize: "0.78rem",
+    fontWeight: 500,
+    color: "#374151",
+    lineHeight: 1.3,
+  },
+  toggleLabelActive: {
+    color: "#1d4ed8",
+  },
+  toggle: {
+    position: "relative" as const,
+    width: "34px",
+    height: "18px",
+    flexShrink: 0,
+  },
+  toggleTrack: {
+    width: "34px",
+    height: "18px",
+    borderRadius: "9px",
+    transition: "background-color 0.2s",
+  },
+  toggleThumb: {
+    position: "absolute" as const,
+    top: "2px",
+    width: "14px",
+    height: "14px",
+    borderRadius: "50%",
+    backgroundColor: "#fff",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+    transition: "left 0.2s",
+  },
+  submitBtn: {
+    width: "100%",
+    padding: "13px",
+    backgroundColor: "#2563eb",
+    color: "#fff",
+    border: "none",
+    borderRadius: "10px",
+    fontSize: "0.9375rem",
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif",
+    letterSpacing: "-0.01em",
+    transition: "background-color 0.15s, transform 0.1s",
+    marginTop: "0.5rem",
+  },
+  resetBtn: {
+    width: "100%",
+    padding: "11px",
+    backgroundColor: "transparent",
+    color: "#64748b",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: "10px",
+    fontSize: "0.875rem",
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif",
+    marginTop: "0.5rem",
+  },
+  resultCard: {
+    backgroundColor: "#ffffff",
+    border: "2px solid #2563eb",
+    borderRadius: "14px",
+    padding: "1.75rem",
+    marginBottom: "1.25rem",
+    boxShadow: "0 4px 20px rgba(37,99,235,0.1)",
+  },
+  resultTitle: {
+    fontSize: "0.8125rem",
+    fontWeight: 600,
+    color: "#64748b",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.08em",
+    marginBottom: "0.5rem",
+  },
+  resultProbability: {
+    fontSize: "3rem",
+    fontWeight: 700,
+    letterSpacing: "-0.04em",
+    lineHeight: 1,
+    marginBottom: "0.25rem",
+  },
+  resultSubtext: {
+    fontSize: "0.8125rem",
+    color: "#64748b",
+    marginBottom: "1.5rem",
+  },
+  gaugeContainer: {
+    marginBottom: "1.25rem",
+  },
+  gaugeBar: {
+    height: "12px",
+    borderRadius: "6px",
+    background: "linear-gradient(to right, #22c55e 0%, #eab308 50%, #ef4444 100%)",
+    position: "relative" as const,
+    marginBottom: "6px",
+  },
+  gaugeMarker: {
+    position: "absolute" as const,
+    top: "-3px",
+    width: "18px",
+    height: "18px",
+    borderRadius: "50%",
+    backgroundColor: "#0f172a",
+    border: "3px solid #fff",
+    boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
+    transform: "translateX(-50%)",
+  },
+  gaugeLabels: {
+    display: "flex",
+    justifyContent: "space-between",
+    fontSize: "0.7rem",
+    color: "#94a3b8",
+    fontWeight: 600,
+  },
+  classificationBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    padding: "6px 14px",
+    borderRadius: "20px",
+    fontSize: "0.8125rem",
+    fontWeight: 700,
+    marginBottom: "1rem",
+  },
+  interpretationBox: {
+    backgroundColor: "#f8fafc",
+    borderRadius: "8px",
+    padding: "1rem",
+    fontSize: "0.8125rem",
+    color: "#475569",
+    lineHeight: 1.7,
+    border: "1px solid #e2e8f0",
+  },
+  metricRow: {
+    display: "flex",
+    gap: "0.75rem",
+    marginTop: "1rem",
+  },
+  metricChip: {
+    flex: 1,
+    backgroundColor: "#f1f5f9",
+    borderRadius: "8px",
+    padding: "10px 12px",
+    textAlign: "center" as const,
+    border: "1px solid #e2e8f0",
+  },
+  metricValue: {
+    fontSize: "1.125rem",
+    fontWeight: 700,
+    color: "#0f172a",
+  },
+  metricLabel: {
+    fontSize: "0.7rem",
+    color: "#94a3b8",
+    fontWeight: 600,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.05em",
+  },
+};
+
+const comorbidities = MODEL_CONFIG.comorbidities;
+
+const initialComorbidities: Record<string, boolean> = {};
+comorbidities.forEach((c) => (initialComorbidities[c.key] = false));
+
+function computeProbability(
+  age: number,
+  sex: string,
+  race: string,
+  insurance: string,
+  comorbs: Record<string, boolean>,
+  maxVal: number
+): number {
+  const { intercept, coefficients, comorbidities: comorbList } = MODEL_CONFIG;
+  let eta = intercept;
+  eta += age * coefficients.age;
+  eta += maxVal * coefficients.max;
+  eta += coefficients.sex[sex] ?? 0;
+  eta += coefficients.race[race] ?? 0;
+  eta += coefficients.insurance[insurance] ?? 0;
+  comorbList.forEach(({ key, coefficient }) => {
+    if (comorbs[key]) eta += coefficient;
+  });
+  return 1 / (1 + Math.exp(-eta));
+}
+
+export default function Calculator() {
+  const [age, setAge] = useState("");
+  const [sex, setSex] = useState("");
+  const [race, setRace] = useState("");
+  const [insurance, setInsurance] = useState("");
+  const [maxTemp, setMaxTemp] = useState("");
+  const [comorbs, setComorbs] = useState<Record<string, boolean>>({ ...initialComorbidities });
+  const [result, setResult] = useState<number | null>(null);
+  const [submitted, setSubmitted] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const toggleComorbidity = (key: string) => {
+    setComorbs((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!age || isNaN(Number(age)) || Number(age) < 0 || Number(age) > 120)
+      e.age = "Enter a valid age (0-120)";
+    if (!sex) e.sex = "Select biological sex";
+    if (!race) e.race = "Select race/ethnicity";
+    if (!insurance) e.insurance = "Select insurance type";
+    if (!maxTemp || isNaN(Number(maxTemp))) e.maxTemp = "Enter a valid MAX value";
+    return e;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const errs = validate();
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
+    }
+    setErrors({});
+    const prob = computeProbability(
+      Number(age),
+      sex,
+      race,
+      insurance,
+      comorbs,
+      Number(maxTemp)
+    );
+    setResult(prob);
+    setSubmitted(true);
+    setTimeout(() => {
+      document.getElementById("result-section")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
+  };
+
+  const handleReset = () => {
+    setAge("");
+    setSex("");
+    setRace("");
+    setInsurance("");
+    setMaxTemp("");
+    setComorbs({ ...initialComorbidities });
+    setResult(null);
+    setSubmitted(false);
+    setErrors({});
+  };
+
+  const THRESHOLD = MODEL_CONFIG.threshold;
+  const isElevated = result !== null && result >= THRESHOLD;
+  const pct = result !== null ? (result * 100).toFixed(1) : null;
+  const gaugeLeft = result !== null ? `${Math.min(result * 100, 99)}%` : "0%";
+
+  const getRiskLevel = (p: number) => {
+    if (p < 0.2) return { label: "Low Risk", color: "#16a34a", bg: "#f0fdf4", border: "#bbf7d0" };
+    if (p < 0.4) return { label: "Moderate Risk", color: "#d97706", bg: "#fffbeb", border: "#fde68a" };
+    return { label: "High Risk", color: "#dc2626", bg: "#fef2f2", border: "#fecaca" };
+  };
+
+  const riskLevel = result !== null ? getRiskLevel(result) : null;
+
+  const inputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    e.target.style.borderColor = "#2563eb";
+    e.target.style.boxShadow = "0 0 0 3px rgba(37,99,235,0.1)";
+  };
+  const inputBlur = (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    e.target.style.borderColor = "#e2e8f0";
+    e.target.style.boxShadow = "none";
+  };
+
+  return (
+    <div style={styles.root}>
+      <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+
+      {/* Nav */}
+      <nav style={styles.nav}>
+        <div style={styles.navBrand}>
+          <div style={styles.navIcon}>H</div>
+          <div>
+            <div style={styles.navTitle}>HRI Risk Calculator</div>
+            <div style={styles.navSubtitle}>Heat-Related Illness Prediction Tool</div>
+          </div>
+        </div>
+        <div style={styles.navBadge}>Research Use Only</div>
+      </nav>
+
+      <main style={styles.main}>
+        {/* Header */}
+        <div style={styles.pageHeader}>
+          <h1 style={styles.pageTitle}>Predicted HRI Risk Calculator</h1>
+          <p style={styles.pageSubtitle}>
+            Enter patient demographics, clinical comorbidities, and environmental exposure index to
+            estimate the probability of a Heat-Related Illness event using a validated elastic-net
+            logistic regression model.
+          </p>
+          <div style={styles.auc}>
+            <span>&#10003;</span> Validated AUC: 0.7957 · 10-fold Cross-Validation
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div style={styles.disclaimer}>
+          <span style={styles.disclaimerIcon}>⚠️</span>
+          <div style={styles.disclaimerText}>
+            <div style={styles.disclaimerTitle}>Important Disclaimer</div>
+            This tool is for <strong>research and educational purposes only</strong> — not for
+            clinical diagnosis or treatment decisions. The underlying dataset was outcome-sampled;
+            raw predicted probabilities may not reflect population-level base rates without
+            recalibration. The model was built on a specific inpatient population and performance
+            may vary in other settings.{" "}
+            <strong>Consult qualified clinical staff before acting on any output.</strong>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          {/* Demographics */}
+          <div style={styles.card}>
+            <div style={styles.sectionTitle}>
+              <div
+                style={{
+                  ...styles.sectionIcon,
+                  backgroundColor: "#eff6ff",
+                  color: "#2563eb",
+                }}
+              >
+                👤
+              </div>
+              Patient Demographics
+            </div>
+            <div style={styles.formGrid}>
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Age (years)</label>
+                <input
+                  type="number"
+                  min={0}
+                  max={120}
+                  placeholder="e.g. 65"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.age ? "#ef4444" : "#e2e8f0",
+                  }}
+                  onFocus={inputFocus}
+                  onBlur={inputBlur}
+                />
+                {errors.age && (
+                  <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.age}</span>
+                )}
+              </div>
+
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Biological Sex</label>
+                <select
+                  value={sex}
+                  onChange={(e) => setSex(e.target.value)}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.sex ? "#ef4444" : "#e2e8f0",
+                    cursor: "pointer",
+                  }}
+                  onFocus={inputFocus}
+                  onBlur={inputBlur}
+                >
+                  <option value="">Select sex</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+                {errors.sex && (
+                  <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.sex}</span>
+                )}
+              </div>
+
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Race / Ethnicity</label>
+                <select
+                  value={race}
+                  onChange={(e) => setRace(e.target.value)}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.race ? "#ef4444" : "#e2e8f0",
+                    cursor: "pointer",
+                  }}
+                  onFocus={inputFocus}
+                  onBlur={inputBlur}
+                >
+                  <option value="">Select race/ethnicity</option>
+                  <option value="White non-Hispanic">White non-Hispanic</option>
+                  <option value="Black non-Hispanic">Black non-Hispanic</option>
+                  <option value="Hispanic">Hispanic</option>
+                  <option value="Other">Other</option>
+                </select>
+                {errors.race && (
+                  <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.race}</span>
+                )}
+              </div>
+
+              <div style={styles.formGroup}>
+                <label style={styles.label}>Insurance Type</label>
+                <select
+                  value={insurance}
+                  onChange={(e) => setInsurance(e.target.value)}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.insurance ? "#ef4444" : "#e2e8f0",
+                    cursor: "pointer",
+                  }}
+                  onFocus={inputFocus}
+                  onBlur={inputBlur}
+                >
+                  <option value="">Select insurance</option>
+                  <option value="Private">Private</option>
+                  <option value="Medicaid/Medicare">Medicaid / Medicare</option>
+                  <option value="Other/Unknown">Other / Unknown</option>
+                </select>
+                {errors.insurance && (
+                  <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.insurance}</span>
+                )}
+              </div>
+
+              <div style={{ ...styles.formGroup, gridColumn: "1 / -1" }}>
+                <label style={styles.label}>
+                  MAX — Environmental Exposure Index
+                  <span
+                    style={{
+                      marginLeft: "6px",
+                      fontSize: "0.72rem",
+                      color: "#94a3b8",
+                      fontWeight: 400,
+                    }}
+                  >
+                    (Maximum temperature or heat index value)
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  placeholder="e.g. 98.6"
+                  value={maxTemp}
+                  onChange={(e) => setMaxTemp(e.target.value)}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.maxTemp ? "#ef4444" : "#e2e8f0",
+                    maxWidth: "260px",
+                  }}
+                  onFocus={inputFocus}
+                  onBlur={inputBlur}
+                />
+                {errors.maxTemp && (
+                  <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.maxTemp}</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Comorbidities */}
+          <div style={styles.card}>
+            <div style={styles.sectionTitle}>
+              <div
+                style={{
+                  ...styles.sectionIcon,
+                  backgroundColor: "#fdf4ff",
+                  color: "#9333ea",
+                }}
+              >
+                🩺
+              </div>
+              Clinical Comorbidities
+              <span
+                style={{
+                  fontSize: "0.75rem",
+                  color: "#94a3b8",
+                  fontWeight: 400,
+                  marginLeft: "4px",
+                }}
+              >
+                — Toggle Yes / No
+              </span>
+            </div>
+            <div style={styles.comorbidityGrid}>
+              {comorbidities.map((c) => {
+                const active = comorbs[c.key];
+                return (
+                  <div
+                    key={c.key}
+                    style={active ? { ...styles.toggleRow, ...styles.toggleRowActive } : styles.toggleRow}
+                    onClick={() => toggleComorbidity(c.key)}
+                  >
+                    <span
+                      style={
+                        active
+                          ? { ...styles.toggleLabel, ...styles.toggleLabelActive }
+                          : styles.toggleLabel
+                      }
+                    >
+                      {c.label}
+                    </span>
+                    <div style={styles.toggle}>
+                      <div
+                        style={{
+                          ...styles.toggleTrack,
+                          backgroundColor: active ? "#2563eb" : "#cbd5e1",
+                        }}
+                      />
+                      <div
+                        style={{
+                          ...styles.toggleThumb,
+                          left: active ? "16px" : "2px",
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <button
+            type="submit"
+            style={styles.submitBtn}
+            onMouseOver={(e) =>
+              ((e.target as HTMLButtonElement).style.backgroundColor = "#1d4ed8")
+            }
+            onMouseOut={(e) =>
+              ((e.target as HTMLButtonElement).style.backgroundColor = "#2563eb")
+            }
+          >
+            Calculate HRI Risk Probability
+          </button>
+          <button type="button" onClick={handleReset} style={styles.resetBtn}>
+            Reset All Fields
+          </button>
+        </form>
+
+        {/* Results */}
+        {submitted && result !== null && riskLevel && (
+          <div id="result-section" style={{ marginTop: "2rem" }}>
+            <div style={styles.resultCard}>
+              <div style={styles.resultTitle}>Estimated HRI Risk</div>
+              <div
+                style={{
+                  ...styles.resultProbability,
+                  color: riskLevel.color,
+                }}
+              >
+                {pct}%
+              </div>
+              <div style={styles.resultSubtext}>Predicted probability of Heat-Related Illness</div>
+
+              {/* Gauge */}
+              <div style={styles.gaugeContainer}>
+                <div style={styles.gaugeBar}>
+                  <div style={{ ...styles.gaugeMarker, left: gaugeLeft }} />
+                </div>
+                <div style={styles.gaugeLabels}>
+                  <span>0% — Low</span>
+                  <span>50% — Moderate</span>
+                  <span>100% — High</span>
+                </div>
+              </div>
+
+              {/* Classification */}
+              <div
+                style={{
+                  ...styles.classificationBadge,
+                  backgroundColor: riskLevel.bg,
+                  color: riskLevel.color,
+                  border: `1.5px solid ${riskLevel.border}`,
+                }}
+              >
+                <span>{isElevated ? "⬆" : "⬇"}</span>
+                {isElevated
+                  ? "Elevated Risk — Above Threshold (≥31.4%)"
+                  : "Below Threshold (<31.4%)"}
+              </div>
+
+              {/* Interpretation */}
+              <div style={styles.interpretationBox}>
+                {isElevated ? (
+                  <>
+                    <strong>Elevated HRI risk detected.</strong> This patient's predicted
+                    probability ({pct}%) exceeds the Youden-optimal threshold of 31.4%. The model
+                    has higher sensitivity (77.6%) than specificity (68.0%) at this cutoff, meaning
+                    it is more likely to flag at-risk patients than to miss them. Clinical judgment
+                    should guide next steps.
+                  </>
+                ) : (
+                  <>
+                    <strong>Risk below threshold.</strong> This patient's predicted probability (
+                    {pct}%) is below the Youden-optimal threshold of 31.4%. The model's negative
+                    predictive value is 86.4%, meaning most patients below this threshold do not
+                    experience an HRI event. This result does not rule out risk — use clinical
+                    judgment.
+                  </>
+                )}
+              </div>
+
+              {/* Model metrics */}
+              <div style={styles.metricRow}>
+                <div style={styles.metricChip}>
+                  <div style={styles.metricValue}>0.796</div>
+                  <div style={styles.metricLabel}>AUC</div>
+                </div>
+                <div style={styles.metricChip}>
+                  <div style={styles.metricValue}>77.6%</div>
+                  <div style={styles.metricLabel}>Sensitivity</div>
+                </div>
+                <div style={styles.metricChip}>
+                  <div style={styles.metricValue}>68.0%</div>
+                  <div style={styles.metricLabel}>Specificity</div>
+                </div>
+                <div style={styles.metricChip}>
+                  <div style={styles.metricValue}>86.4%</div>
+                  <div style={styles.metricLabel}>NPV</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}

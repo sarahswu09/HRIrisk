@@ -24,7 +24,7 @@ curl -fsSL https://bun.sh/install | bash
 1. **Clone or download the project**, then navigate to the project folder:
 
 ```bash
-cd sarah_calculator
+cd HRIrisk
 ```
 
 2. **Install dependencies:**

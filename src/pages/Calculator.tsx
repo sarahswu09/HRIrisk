@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MODEL_CONFIG } from "../config/modelConfig";
+import {
+  fetchTenDayTemperatureForecast,
+  type TemperatureForecast,
+} from "../services/weather";
 
 const styles: Record<string, React.CSSProperties> = {
   root: {
@@ -351,9 +355,123 @@ const styles: Record<string, React.CSSProperties> = {
     textTransform: "uppercase" as const,
     letterSpacing: "0.05em",
   },
+  forecastForm: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    alignItems: "flex-end",
+    gap: "0.75rem",
+    marginBottom: "1rem",
+  },
+  forecastInputWrap: {
+    flex: "1 1 260px",
+    minWidth: 0,
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "5px",
+  },
+  compactButton: {
+    padding: "10px 14px",
+    backgroundColor: "#2563eb",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    fontSize: "0.8125rem",
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif",
+    whiteSpace: "nowrap" as const,
+  },
+  compactButtonDisabled: {
+    backgroundColor: "#94a3b8",
+    cursor: "not-allowed",
+  },
+  secondaryCompactButton: {
+    padding: "9px 12px",
+    backgroundColor: "#f8fafc",
+    color: "#334155",
+    border: "1.5px solid #cbd5e1",
+    borderRadius: "8px",
+    fontSize: "0.78rem",
+    fontWeight: 700,
+    cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif",
+    whiteSpace: "nowrap" as const,
+  },
+  forecastError: {
+    backgroundColor: "#fef2f2",
+    border: "1px solid #fecaca",
+    color: "#b91c1c",
+    borderRadius: "8px",
+    padding: "0.75rem 0.875rem",
+    fontSize: "0.8125rem",
+    marginBottom: "1rem",
+  },
+  forecastMeta: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    justifyContent: "space-between",
+    gap: "0.5rem",
+    color: "#475569",
+    fontSize: "0.8125rem",
+    fontWeight: 600,
+    marginBottom: "0.75rem",
+  },
+  forecastGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(118px, 1fr))",
+    gap: "0.625rem",
+  },
+  forecastDay: {
+    appearance: "none" as const,
+    textAlign: "left" as const,
+    backgroundColor: "#f8fafc",
+    border: "1.5px solid #e2e8f0",
+    borderRadius: "8px",
+    padding: "0.75rem",
+    cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif",
+  },
+  forecastDayHot: {
+    backgroundColor: "#fff7ed",
+    border: "1.5px solid #fdba74",
+  },
+  forecastDate: {
+    color: "#64748b",
+    fontSize: "0.72rem",
+    fontWeight: 700,
+    textTransform: "uppercase" as const,
+    marginBottom: "0.35rem",
+  },
+  forecastHigh: {
+    color: "#0f172a",
+    fontSize: "1.2rem",
+    fontWeight: 800,
+    lineHeight: 1,
+  },
+  forecastLow: {
+    color: "#64748b",
+    fontSize: "0.78rem",
+    fontWeight: 600,
+    marginTop: "0.25rem",
+  },
+  forecastActions: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "0.75rem",
+    marginTop: "1rem",
+  },
+  sourceLink: {
+    color: "#2563eb",
+    fontSize: "0.78rem",
+    fontWeight: 600,
+    textDecoration: "none",
+  },
 };
 
 const comorbidities = MODEL_CONFIG.comorbidities;
+const DEFAULT_WEATHER_LOCATION = "New York City, New York";
 
 const initialComorbidities: Record<string, boolean> = {};
 comorbidities.forEach((c) => (initialComorbidities[c.key] = false));
@@ -379,6 +497,18 @@ function computeProbability(
   return 1 / (1 + Math.exp(-eta));
 }
 
+function formatForecastDate(date: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(`${date}T00:00:00`));
+}
+
+function formatTemp(value: number): string {
+  return `${Math.round(value)}°F`;
+}
+
 export default function Calculator() {
   const [age, setAge] = useState("");
   const [sex, setSex] = useState("");
@@ -389,9 +519,47 @@ export default function Calculator() {
   const [result, setResult] = useState<number | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [weatherLocation, setWeatherLocation] = useState(DEFAULT_WEATHER_LOCATION);
+  const [forecast, setForecast] = useState<TemperatureForecast | null>(null);
+  const [forecastLoading, setForecastLoading] = useState(false);
+  const [forecastError, setForecastError] = useState("");
 
   const toggleComorbidity = (key: string) => {
     setComorbs((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const setMaxTemperatureFromForecast = (temperature: number) => {
+    setMaxTemp(temperature.toFixed(1));
+    setErrors((prev) => {
+      if (!prev.maxTemp) return prev;
+      const next = { ...prev };
+      delete next.maxTemp;
+      return next;
+    });
+  };
+
+  const loadForecast = async (location: string) => {
+    setForecastError("");
+    setForecastLoading(true);
+
+    try {
+      const nextForecast = await fetchTenDayTemperatureForecast(location);
+      setForecast(nextForecast);
+    } catch (error) {
+      setForecast(null);
+      setForecastError(error instanceof Error ? error.message : "Unable to load forecast.");
+    } finally {
+      setForecastLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadForecast(DEFAULT_WEATHER_LOCATION);
+  }, []);
+
+  const handleForecastSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await loadForecast(weatherLocation);
   };
 
   const validate = () => {
@@ -507,6 +675,121 @@ export default function Calculator() {
             may vary in other settings.{" "}
             <strong>Consult qualified clinical staff before acting on any output.</strong>
           </div>
+        </div>
+
+        {/* Weather Forecast */}
+        <div style={styles.card}>
+          <div style={styles.sectionTitle}>
+            <div
+              style={{
+                ...styles.sectionIcon,
+                backgroundColor: "#ecfeff",
+                color: "#0e7490",
+              }}
+            >
+              °F
+            </div>
+            Predicted Daily Temperatures
+            <span
+              style={{
+                fontSize: "0.75rem",
+                color: "#94a3b8",
+                fontWeight: 400,
+                marginLeft: "4px",
+              }}
+            >
+              Next 10 days
+            </span>
+          </div>
+
+          <form onSubmit={handleForecastSubmit} style={styles.forecastForm}>
+            <div style={styles.forecastInputWrap}>
+              <label htmlFor="forecast-location" style={styles.label}>
+                Forecast Location
+              </label>
+              <input
+                id="forecast-location"
+                type="text"
+                placeholder="e.g. Phoenix, AZ"
+                value={weatherLocation}
+                onChange={(e) => setWeatherLocation(e.target.value)}
+                style={styles.input}
+                onFocus={inputFocus}
+                onBlur={inputBlur}
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={forecastLoading}
+              style={
+                forecastLoading
+                  ? { ...styles.compactButton, ...styles.compactButtonDisabled }
+                  : styles.compactButton
+              }
+            >
+              {forecastLoading ? "Loading..." : "Get Forecast"}
+            </button>
+          </form>
+
+          {forecastError && (
+            <div style={styles.forecastError} role="alert">
+              {forecastError}
+            </div>
+          )}
+
+          {forecast && (
+            <>
+              <div style={styles.forecastMeta} aria-live="polite">
+                <span>{forecast.locationLabel}</span>
+                {forecast.hottestHighF !== null && (
+                  <span>Hottest daily high: {formatTemp(forecast.hottestHighF)}</span>
+                )}
+              </div>
+
+              <div style={styles.forecastGrid}>
+                {forecast.days.map((day) => {
+                  const isHottest = forecast.hottestHighF === day.highF;
+                  return (
+                    <button
+                      key={day.date}
+                      type="button"
+                      onClick={() => setMaxTemperatureFromForecast(day.highF)}
+                      style={
+                        isHottest
+                          ? { ...styles.forecastDay, ...styles.forecastDayHot }
+                          : styles.forecastDay
+                      }
+                      title="Use this high temperature as MAX"
+                    >
+                      <div style={styles.forecastDate}>{formatForecastDate(day.date)}</div>
+                      <div style={styles.forecastHigh}>{formatTemp(day.highF)}</div>
+                      <div style={styles.forecastLow}>Low {formatTemp(day.lowF)}</div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div style={styles.forecastActions}>
+                {forecast.hottestHighF !== null && (
+                  <button
+                    type="button"
+                    onClick={() => setMaxTemperatureFromForecast(forecast.hottestHighF!)}
+                    style={styles.secondaryCompactButton}
+                  >
+                    Use Hottest Daily High as MAX
+                  </button>
+                )}
+                <a
+                  href={forecast.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={styles.sourceLink}
+                >
+                  Forecast source: Open-Meteo
+                </a>
+              </div>
+            </>
+          )}
         </div>
 
         <form onSubmit={handleSubmit}>

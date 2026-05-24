@@ -468,6 +468,18 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 600,
     textDecoration: "none",
   },
+  footer: {
+    borderTop: "1px solid #e2e8f0",
+    marginTop: "2rem",
+    paddingTop: "1.5rem",
+    textAlign: "center" as const,
+  },
+  footerLink: {
+    color: "#2563eb",
+    fontSize: "0.875rem",
+    fontWeight: 700,
+    textDecoration: "none",
+  },
 };
 
 const comorbidities = MODEL_CONFIG.comorbidities;
@@ -1097,6 +1109,17 @@ export default function Calculator() {
             </div>
           </div>
         )}
+
+        <footer style={styles.footer}>
+          <a
+            href="https://finder.nyc.gov/coolingcenters/"
+            target="_blank"
+            rel="noreferrer"
+            style={styles.footerLink}
+          >
+            Finding a cooling center
+          </a>
+        </footer>
       </main>
     </div>
   );

@@ -489,20 +489,18 @@ const initialComorbidities: Record<string, boolean> = {};
 comorbidities.forEach((c) => (initialComorbidities[c.key] = false));
 
 function computeProbability(
-  age: number,
+  age: string,
   sex: string,
   race: string,
-  insurance: string,
   comorbs: Record<string, boolean>,
   maxVal: number
 ): number {
   const { intercept, coefficients, comorbidities: comorbList } = MODEL_CONFIG;
   let eta = intercept;
-  eta += age * coefficients.age;
+  eta += coefficients.age[age]?? 0;
   eta += maxVal * coefficients.max;
   eta += coefficients.sex[sex] ?? 0;
   eta += coefficients.race[race] ?? 0;
-  eta += coefficients.insurance[insurance] ?? 0;
   comorbList.forEach(({ key, coefficient }) => {
     if (comorbs[key]) eta += coefficient;
   });
@@ -525,7 +523,6 @@ export default function Calculator() {
   const [age, setAge] = useState("");
   const [sex, setSex] = useState("");
   const [race, setRace] = useState("");
-  const [insurance, setInsurance] = useState("");
   const [maxTemp, setMaxTemp] = useState("");
   const [comorbs, setComorbs] = useState<Record<string, boolean>>({ ...initialComorbidities });
   const [result, setResult] = useState<number | null>(null);
@@ -576,11 +573,11 @@ export default function Calculator() {
 
   const validate = () => {
     const e: Record<string, string> = {};
-    if (!age || isNaN(Number(age)) || Number(age) < 0 || Number(age) > 120)
-      e.age = "Enter a valid age (0-120)";
+    //if (!age || isNaN(Number(age)) || Number(age) < 0 || Number(age) > 120)
+    //  e.age = "Enter a valid age (0-120)";
+    if (!age) e.age = "Select age group";
     if (!sex) e.sex = "Select biological sex";
     if (!race) e.race = "Select race/ethnicity";
-    if (!insurance) e.insurance = "Select insurance type";
     if (!maxTemp || isNaN(Number(maxTemp))) e.maxTemp = "Enter a valid MAX value";
     return e;
   };
@@ -594,10 +591,10 @@ export default function Calculator() {
     }
     setErrors({});
     const prob = computeProbability(
-      Number(age),
+      //Number(age),
+      age,
       sex,
       race,
-      insurance,
       comorbs,
       Number(maxTemp)
     );
@@ -612,7 +609,6 @@ export default function Calculator() {
     setAge("");
     setSex("");
     setRace("");
-    setInsurance("");
     setMaxTemp("");
     setComorbs({ ...initialComorbidities });
     setResult(null);
@@ -666,7 +662,7 @@ export default function Calculator() {
         <div style={styles.pageHeader}>
           <h1 style={styles.pageTitle}>Predicted HRI Risk Calculator</h1>
           <p style={styles.pageSubtitle}>
-            Enter patient demographics, clinical comorbidities, and environmental exposure index to
+            Enter patient demographics, comorbidities, and environmental exposure index to
             estimate the probability of a Heat-Related Illness event using a validated elastic-net
             logistic regression model.
           </p>
@@ -788,7 +784,7 @@ export default function Calculator() {
                     onClick={() => setMaxTemperatureFromForecast(forecast.hottestHighF!)}
                     style={styles.secondaryCompactButton}
                   >
-                    Use Hottest Daily High as MAX
+                    Use Hottest Daily High as "MAX — Environmental Exposure Index"
                   </button>
                 )}
                 <a
@@ -800,11 +796,72 @@ export default function Calculator() {
                   Forecast source: Open-Meteo
                 </a>
               </div>
+
             </>
           )}
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* HeatIndex */}
+          <div style={styles.card}>
+            <div style={styles.sectionTitle}>
+              <div
+                style={{
+                  ...styles.sectionIcon,
+                  backgroundColor: "#eff6ff",
+                  color: "#2563eb",
+                }}
+              >
+                ☁
+              </div>
+              Heat Index 
+                <span
+                style={{
+                  fontSize: "0.75rem",
+                  color: "#94a3b8",
+                  fontWeight: 400,
+                  marginLeft: "4px",
+                }}
+              >
+                (click on the above forecast to set value, OR input your own value below)
+              </span>
+            </div>
+
+            <div style={styles.formGrid}>
+              <div style={{ ...styles.formGroup, gridColumn: "1 / -1" }}>
+                <label style={styles.label}>
+                  MAX — Environmental Exposure Index
+                  <span
+                    style={{
+                      marginLeft: "6px",
+                      fontSize: "0.72rem",
+                      color: "#94a3b8",
+                      fontWeight: 400,
+                    }}
+                  >
+                    (Maximum temperature or heat index value)
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  placeholder="e.g. 98.6"
+                  value={maxTemp}
+                  onChange={(e) => setMaxTemp(e.target.value)}
+                  style={{
+                    ...styles.input,
+                    borderColor: errors.maxTemp ? "#ef4444" : "#e2e8f0",
+                    maxWidth: "260px",
+                  }}
+                  onFocus={inputFocus}
+                  onBlur={inputBlur}
+                />
+                {errors.maxTemp && (
+                  <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.maxTemp}</span>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Demographics */}
           <div style={styles.card}>
             <div style={styles.sectionTitle}>
@@ -819,24 +876,29 @@ export default function Calculator() {
               </div>
               Patient Demographics
             </div>
+            
             <div style={styles.formGrid}>
+
               <div style={styles.formGroup}>
-                <label style={styles.label}>Age (years)</label>
-                <input
-                  type="number"
-                  min={0}
-                  max={120}
-                  placeholder="e.g. 65"
+                <label style={styles.label}>Age Group</label>
+                <select
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
                   style={{
                     ...styles.input,
                     borderColor: errors.age ? "#ef4444" : "#e2e8f0",
+                    cursor: "pointer",
                   }}
                   onFocus={inputFocus}
                   onBlur={inputBlur}
-                />
-                {errors.age && (
+                >
+                  <option value="">Select age</option>
+                  <option value="Adult (>64)">Adult (64+)</option>
+                  <option value="Adult (45-64)">Adult (45-64)</option>
+                  <option value="Adult (18-44)">Adult (18-44)</option>
+                  <option value="Children (<18)">Children (below 18)</option>
+                </select>
+                {errors.sex && (
                   <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.age}</span>
                 )}
               </div>
@@ -880,6 +942,7 @@ export default function Calculator() {
                   <option value="White non-Hispanic">White non-Hispanic</option>
                   <option value="Black non-Hispanic">Black non-Hispanic</option>
                   <option value="Hispanic">Hispanic</option>
+                  <option value="Asia">Asia</option>
                   <option value="Other">Other</option>
                 </select>
                 {errors.race && (
@@ -887,60 +950,6 @@ export default function Calculator() {
                 )}
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Insurance Type</label>
-                <select
-                  value={insurance}
-                  onChange={(e) => setInsurance(e.target.value)}
-                  style={{
-                    ...styles.input,
-                    borderColor: errors.insurance ? "#ef4444" : "#e2e8f0",
-                    cursor: "pointer",
-                  }}
-                  onFocus={inputFocus}
-                  onBlur={inputBlur}
-                >
-                  <option value="">Select insurance</option>
-                  <option value="Private">Private</option>
-                  <option value="Medicaid/Medicare">Medicaid / Medicare</option>
-                  <option value="Other/Unknown">Other / Unknown</option>
-                </select>
-                {errors.insurance && (
-                  <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.insurance}</span>
-                )}
-              </div>
-
-              <div style={{ ...styles.formGroup, gridColumn: "1 / -1" }}>
-                <label style={styles.label}>
-                  MAX — Environmental Exposure Index
-                  <span
-                    style={{
-                      marginLeft: "6px",
-                      fontSize: "0.72rem",
-                      color: "#94a3b8",
-                      fontWeight: 400,
-                    }}
-                  >
-                    (Maximum temperature or heat index value)
-                  </span>
-                </label>
-                <input
-                  type="number"
-                  placeholder="e.g. 98.6"
-                  value={maxTemp}
-                  onChange={(e) => setMaxTemp(e.target.value)}
-                  style={{
-                    ...styles.input,
-                    borderColor: errors.maxTemp ? "#ef4444" : "#e2e8f0",
-                    maxWidth: "260px",
-                  }}
-                  onFocus={inputFocus}
-                  onBlur={inputBlur}
-                />
-                {errors.maxTemp && (
-                  <span style={{ fontSize: "0.75rem", color: "#ef4444" }}>{errors.maxTemp}</span>
-                )}
-              </div>
             </div>
           </div>
 
@@ -956,7 +965,7 @@ export default function Calculator() {
               >
                 🩺
               </div>
-              Clinical Comorbidities
+              Comorbidities
               <span
                 style={{
                   fontSize: "0.75rem",

@@ -48,7 +48,7 @@ export const MODEL_CONFIG: ModelConfig = {
       "White non-Hispanic": 0.557158,
       Hispanic: -0.170234,
       Other: 0.222823,
-      Asia: 0,
+      Asian: 0,
     } as Record<string, number>,
 
     // Reference category: Private (not in model output = 0)

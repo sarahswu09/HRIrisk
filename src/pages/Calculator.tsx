@@ -942,7 +942,7 @@ export default function Calculator() {
                   <option value="White non-Hispanic">White non-Hispanic</option>
                   <option value="Black non-Hispanic">Black non-Hispanic</option>
                   <option value="Hispanic">Hispanic</option>
-                  <option value="Asia">Asia</option>
+                  <option value="Asian">Asian</option>
                   <option value="Other">Other</option>
                 </select>
                 {errors.race && (

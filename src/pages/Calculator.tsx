@@ -1091,8 +1091,7 @@ export default function Calculator() {
                     <strong>HOORAY! Risk below threshold.</strong> This patient's predicted probability (
                     {pct}%) is below the Youden-optimal threshold of 31.4%. The model's negative
                     predictive value is 86.4%, meaning most patients below this threshold do not
-                    experience an HRI event. This result does not rule out risk — use clinical
-                    judgment.
+                    experience an HRI event. 
                   </>
                 )}
               </div>
@@ -1211,7 +1210,7 @@ export default function Calculator() {
                   death without emergency treatment.
                   </>
                 ) : (
-                  <>  </>
+                  <> Note: This result does not rule out risk — use clinical judgment. </>
                 )}
               </div>
 

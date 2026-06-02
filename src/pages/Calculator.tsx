@@ -651,7 +651,7 @@ export default function Calculator() {
           <div style={styles.navIcon}>H</div>
           <div>
             <div style={styles.navTitle}>HRI Risk Calculator</div>
-            <div style={styles.navSubtitle}>Heat-Related Illness Prediction Tool</div>
+            <div style={styles.navSubtitle}>Prediction Tool for Heat-Related ED Visit </div>
           </div>
         </div>
         <div style={styles.navBadge}>Research Use Only</div>
@@ -662,9 +662,9 @@ export default function Calculator() {
         <div style={styles.pageHeader}>
           <h1 style={styles.pageTitle}>Predicted HRI Risk Calculator</h1>
           <p style={styles.pageSubtitle}>
-            Enter patient demographics, comorbidities, and environmental exposure index to
-            estimate the probability of a Heat-Related Illness event using a validated elastic-net
-            logistic regression model.
+            Enter patient demographics, comorbidities, and environmental exposure index 
+            to estimate the probability of a Heat-Related emergency hospital visit using 
+            a validated elastic-net logistic regression model.
           </p>
           <div style={styles.auc}>
             <span>&#10003;</span> Validated AUC: 0.7957 · 10-fold Cross-Validation
@@ -677,7 +677,8 @@ export default function Calculator() {
           <div style={styles.disclaimerText}>
             <div style={styles.disclaimerTitle}>Important Disclaimer</div>
             This tool is for <strong>research and educational purposes only</strong> — not for
-            clinical diagnosis or treatment decisions. The underlying dataset was outcome-sampled;
+            clinical diagnosis or treatment decisions. The underlying dataset was outcome-sampled 
+            from all ED visits during May to September at NYC during 2017-2024;
             raw predicted probabilities may not reflect population-level base rates without
             recalibration. The model was built on a specific inpatient population and performance
             may vary in other settings.{" "}
@@ -839,7 +840,7 @@ export default function Calculator() {
                       fontWeight: 400,
                     }}
                   >
-                    (Maximum temperature or heat index value)
+                    (Maximum daily temperature in Fahrenheit, °F)
                   </span>
                 </label>
                 <input
@@ -1087,7 +1088,7 @@ export default function Calculator() {
                   </>
                 ) : (
                   <>
-                    <strong>Risk below threshold.</strong> This patient's predicted probability (
+                    <strong>HOORAY! Risk below threshold.</strong> This patient's predicted probability (
                     {pct}%) is below the Youden-optimal threshold of 31.4%. The model's negative
                     predictive value is 86.4%, meaning most patients below this threshold do not
                     experience an HRI event. This result does not rule out risk — use clinical
@@ -1095,6 +1096,7 @@ export default function Calculator() {
                   </>
                 )}
               </div>
+
 
               {/* Model metrics */}
               <div style={styles.metricRow}>
@@ -1115,19 +1117,110 @@ export default function Calculator() {
                   <div style={styles.metricLabel}>NPV</div>
                 </div>
               </div>
+
+               <br />
+              {/* Interpretation */}
+              <div style={styles.interpretationBox}>
+                {isElevated ? (
+                  <>
+
+                  <strong>Recommendations</strong>
+
+                  <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
+                    <li>
+                      Do outdoor activities early morning or after sunset, and reserve the
+                      hottest hours for indoor, air-conditioned places.
+                    </li>
+
+                    <li>
+                      When outdoors, one can find nearby NYC cooling centers through the <a
+                      href="https://finder.nyc.gov/coolingcenters/"
+                      target="_blank"
+                      rel="noreferrer"
+                      style={styles.footerLink}
+                    >
+                    NYC Cool Options Finder 
+                    </a> or call 311 if needed.
+                    </li>
+
+                    <li>
+                      Remember to carry water, drink regularly before feeling thirsty, and
+                      avoid heavy alcohol intake during the day. Heat exhaustion is
+                      associated with excessive loss of water and salt, and CDC lists
+                      thirst, heavy sweating, dizziness, weakness, nausea, and headache as
+                      warning signs.
+                    </li>
+
+                    <li>
+                      If you feel dizzy, nauseated, weak, confused, or stop sweating
+                      normally, stop immediately and seek help—call 911 for confusion,
+                      fainting, or severe symptoms.
+                    </li>
+                  </ul>
+
+                  <strong><span style={{ color: "red" }}>!!! Warning signs !!!</span></strong>
+                  <br />
+                  Stop immediately, go indoors and cool down if one has:
+
+                  <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
+                    <li>
+                      Heavy sweating
+                    </li>
+
+                    <li>
+                      Dizziness or weaknes
+                    </li>
+
+                    <li>
+                      Headache
+                    </li>
+
+                    <li>
+                      Nausea
+                    </li>
+
+                    <li>
+                      Muscle cramps
+                    </li>
+
+                    <li>
+                      Unusual fatigue
+                    </li>                                        
+                  </ul>                  
+
+                  These are common heat exhaustion symptoms. CDC recommends moving to a cool place,
+                  loosening clothing, cooling the body, sipping water, and getting medical help if symptoms
+                  worsen, vomiting occurs, or symptoms last more than 1 hour.
+                  <br /><br />
+                  <strong>Call 911 immediately if one has:</strong>
+                  <ul style={{ marginTop: "8px", paddingLeft: "20px" }}>
+                    <li>
+                      Confusion, slurred speech, fainting, seizure, or loss of consciousness
+                    </li>
+
+                    <li>
+                      Hot skin or very high body temperature
+                    </li>
+
+                    <li>
+                      Rapid worsening symptoms
+                    </li>
+                                   
+                  </ul>                    
+                  CDC states that heat stroke is a medical emergency and can cause permanent disability or
+                  death without emergency treatment.
+                  </>
+                ) : (
+                  <>  </>
+                )}
+              </div>
+
+
             </div>
           </div>
         )}
 
         <footer style={styles.footer}>
-          <a
-            href="https://finder.nyc.gov/coolingcenters/"
-            target="_blank"
-            rel="noreferrer"
-            style={styles.footerLink}
-          >
-            Finding a cooling center
-          </a>
         </footer>
       </main>
     </div>

@@ -64,9 +64,9 @@ export const MODEL_CONFIG: ModelConfig = {
   // To remove one: delete the entry. The calculator will update automatically.
 
   comorbidities: [
-    { key: "PSYCH",        label: "Psychiatric",              coefficient: 0.178478 },
-    { key: "NEURO",        label: "Neurologic",               coefficient: 0.202683 },
-    { key: "CARDIO",       label: "Cariovascular",            coefficient: 0.065762 },
+    { key: "PSYCH",        label: "Psychiatric (e.g. depression, psychosis)",              coefficient: 0.178478 },
+    { key: "NEURO",        label: "Neurologic (e.g. dementia, paralysis, mulitple sclerosis, peripheral neurophy,Parkinson’s disease,Epilepsy, seisure)",               coefficient: 0.202683 },
+    { key: "CARDIO",       label: "Cariovascular (e.g. heart failure, hypertension; Valvular Disease such as aortic/mitral valve disorders;  Peripheral Vascular Disease such as arteries outside heart/brain; Pulmonary Circulation Disorders such as pulmonary hypertension, embolism; Cerebrovascular Disease such as stroke, TIA; Coagulation Disorders, such as clotting or bleeding abnormalities; CMR_HF Heart Failure)",            coefficient: 0.065762 },
   ],
 
   //comorbidities: [

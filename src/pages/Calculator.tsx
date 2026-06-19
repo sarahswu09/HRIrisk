@@ -651,10 +651,10 @@ export default function Calculator() {
           <div style={styles.navIcon}>H</div>
           <div>
             <div style={styles.navTitle}>HRI Risk Calculator</div>
-            <div style={styles.navSubtitle}>Prediction Tool for Heat-Related ED Visit </div>
+            <div style={styles.navSubtitle}>Prediction Tool for HRI (emergency department visit with heat related illness) </div>
           </div>
         </div>
-        <div style={styles.navBadge}>Research Use Only</div>
+        {/*<div style={styles.navBadge}>Research Use Only</div> */}
       </nav>
 
       <main style={styles.main}>
@@ -662,7 +662,8 @@ export default function Calculator() {
         <div style={styles.pageHeader}>
           <h1 style={styles.pageTitle}>Predicted HRI Risk Calculator</h1>
           <p style={styles.pageSubtitle}>
-            Enter patient demographics, comorbidities, and environmental exposure index 
+            {/* HRI stands for heat related emergency department visit.*/}
+            Enter your demographics, comorbidities, and environmental exposure index 
             to estimate the probability of a Heat-Related emergency hospital visit using 
             a validated elastic-net logistic regression model.
           </p>
@@ -671,20 +672,6 @@ export default function Calculator() {
           </div>
         </div>
 
-        {/* Disclaimer */}
-        <div style={styles.disclaimer}>
-          <span style={styles.disclaimerIcon}>⚠️</span>
-          <div style={styles.disclaimerText}>
-            <div style={styles.disclaimerTitle}>Important Disclaimer</div>
-            This tool is for <strong>research and educational purposes only</strong> — not for
-            clinical diagnosis or treatment decisions. The underlying dataset was outcome-sampled 
-            from all ED visits during May to September at NYC during 2017-2024;
-            raw predicted probabilities may not reflect population-level base rates without
-            recalibration. The model was built on a specific inpatient population and performance
-            may vary in other settings.{" "}
-            <strong>Consult qualified clinical staff before acting on any output.</strong>
-          </div>
-        </div>
 
         {/* Weather Forecast */}
         <div style={styles.card}>
@@ -1220,6 +1207,20 @@ export default function Calculator() {
         )}
 
         <footer style={styles.footer}>
+        {/* Disclaimer */}
+        <div style={styles.disclaimer}>
+          <span style={styles.disclaimerIcon}>⚠️</span>
+          <div style={styles.disclaimerText}>
+            <div style={styles.disclaimerTitle}>Important Disclaimer</div>
+            This tool is for <strong>research and educational purposes only</strong> — not for
+            clinical diagnosis or treatment decisions. The underlying dataset was outcome-sampled 
+            from all ED visits during May to September at NYC during 2017-2024;
+            raw predicted probabilities may not reflect population-level base rates without
+            recalibration. The model was built on a specific inpatient population and performance
+            may vary in other settings.{" "}
+            <strong>Consult qualified clinical staff before acting on any output.</strong>
+          </div>
+        </div>          
         </footer>
       </main>
     </div>

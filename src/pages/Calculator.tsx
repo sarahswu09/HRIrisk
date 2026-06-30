@@ -432,11 +432,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "'DM Sans', sans-serif",
   },
   forecastDayHot: {
-    backgroundColor: "#fff7ed",
-    border: "1.5px solid #fdba74",
+    boxShadow: "0 0 0 2px rgba(249, 115, 22, 0.22)",
   },
   forecastDate: {
-    color: "#64748b",
+    color: "#ffffff",
     fontSize: "0.72rem",
     fontWeight: 700,
     textTransform: "uppercase" as const,
@@ -517,6 +516,48 @@ function formatForecastDate(date: string): string {
 
 function formatTemp(value: number): string {
   return `${Math.round(value)}°F`;
+}
+
+const FORECAST_COLOR_LOW_F = 50;
+const FORECAST_COLOR_HIGH_F = 104;
+const FORECAST_COLOR_ICE_BLUE = { r: 224, g: 247, b: 255 };
+const FORECAST_COLOR_ORANGE = { r: 249, g: 115, b: 22 };
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function mixChannel(start: number, end: number, amount: number): number {
+  return Math.round(start + (end - start) * amount);
+}
+
+function mixRgb(
+  start: typeof FORECAST_COLOR_ICE_BLUE,
+  end: typeof FORECAST_COLOR_ICE_BLUE,
+  amount: number,
+): string {
+  return `rgb(${mixChannel(start.r, end.r, amount)}, ${mixChannel(
+    start.g,
+    end.g,
+    amount,
+  )}, ${mixChannel(start.b, end.b, amount)})`;
+}
+
+function getForecastTemperatureStyle(highF: number): React.CSSProperties {
+  const heatAmount = clamp(
+    (highF - FORECAST_COLOR_LOW_F) / (FORECAST_COLOR_HIGH_F - FORECAST_COLOR_LOW_F),
+    0,
+    1,
+  );
+
+  return {
+    backgroundColor: mixRgb(FORECAST_COLOR_ICE_BLUE, FORECAST_COLOR_ORANGE, heatAmount),
+    borderColor: mixRgb(
+      { r: 125, g: 211, b: 252 },
+      FORECAST_COLOR_ORANGE,
+      heatAmount,
+    ),
+  };
 }
 
 export default function Calculator() {
@@ -660,7 +701,7 @@ export default function Calculator() {
       <main style={styles.main}>
         {/* Header */}
         <div style={styles.pageHeader}>
-          <h1 style={styles.pageTitle}>Predicted HRI Risk Calculator</h1>
+          <h1 style={styles.pageTitle}>NYC Heat Risk Calculator</h1>
           <p style={styles.pageSubtitle}>
             {/* HRI stands for heat related emergency department visit.*/}
             Enter your demographics, comorbidities, and environmental exposure index 
@@ -738,7 +779,7 @@ export default function Calculator() {
               <div style={styles.forecastMeta} aria-live="polite">
                 <span>{forecast.locationLabel}</span>
                 {forecast.hottestHighF !== null && (
-                  <span>Hottest daily high: {formatTemp(forecast.hottestHighF)}</span>
+                  <span>Hottest daily high in 10 days: {formatTemp(forecast.hottestHighF)}</span>
                 )}
               </div>
 
@@ -752,8 +793,15 @@ export default function Calculator() {
                       onClick={() => setMaxTemperatureFromForecast(day.highF)}
                       style={
                         isHottest
-                          ? { ...styles.forecastDay, ...styles.forecastDayHot }
-                          : styles.forecastDay
+                          ? {
+                              ...styles.forecastDay,
+                              ...getForecastTemperatureStyle(day.highF),
+                              ...styles.forecastDayHot,
+                            }
+                          : {
+                              ...styles.forecastDay,
+                              ...getForecastTemperatureStyle(day.highF),
+                            }
                       }
                       title="Use this high temperature as MAX"
                     >

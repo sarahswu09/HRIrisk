@@ -518,7 +518,7 @@ function formatTemp(value: number): string {
   return `${Math.round(value)}°F`;
 }
 
-const FORECAST_COLOR_LOW_F = 50;
+const FORECAST_COLOR_LOW_F = 65;
 const FORECAST_COLOR_HIGH_F = 104;
 const FORECAST_COLOR_ICE_BLUE = { r: 224, g: 247, b: 255 };
 const FORECAST_COLOR_ORANGE = { r: 249, g: 115, b: 22 };
